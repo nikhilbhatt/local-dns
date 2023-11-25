@@ -1,20 +1,18 @@
 services:
   nginx:
-    build:
-      context: ./nginx
+    image: nginx:1.25.3
     ports:
       - 80:80
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/conf.d:/etc/nginx/conf.d
   dns:
-    build:
-      context: ./dns
+    image: alpine:3.14
     restart: always
     ports:
      - 53:53
      - 53:53/udp
     volumes:
       - ./dns/zone:/etc/bind/zone
-      - ./dns/named.conf:/etc/bind/named.conf.authoritative
-    command: named -c /etc/bind/named.conf.authoritative -g -u named
+      - ./dns/named.conf:/etc/bind/named.conf
+    command: /bin/sh -c "apk add bind openrc && rc-update -u named && named -c /etc/bind/named.conf -g -u named"
